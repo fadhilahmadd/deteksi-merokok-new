@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Multi-Camera Smoking Detection</title>
+    <style>
+        :root {
+            --camera-width: 640px;
+            --camera-height: 480px;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        .cameras-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(var(--camera-width), 1fr));
+            gap: 20px;
+            width: 100%;
+            justify-content: center;
+        }
+        .camera-container {
+            position: relative;
+            border: 2px solid #333;
+            border-radius: 5px;
+            overflow: hidden;
+            width: var(--camera-width);
+            height: var(--camera-height);
+            background: #000;
+        }
+        .camera-header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 8px;
+            z-index: 10;
+            display: flex;
+            justify-content: space-between;
+        }
+        .camera-name {
+            font-weight: bold;
+        }
+        .camera-status {
+            padding: 2px 8px;
+            border-radius: 3px;
+        }
+        .status-active {
+            background: #28a745;
+        }
+        .status-inactive {
+            background: #dc3545;
+        }
+        .camera-feed {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        .loading {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+            z-index: 5;
+        }
+        .log-container {
+            width: 80%;
+            margin-top: 30px;
+        }
+        @media (max-width: 768px) {
+            .cameras-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Multi-Camera Smoking Detection</h1>
+        
+        <div class="cameras-grid">
+            {% for camera in cameras %}
+            <div class="camera-container" id="camera-container-{{ loop.index0 }}">
+                <div class="camera-header">
+                    <span class="camera-name">{{ camera.name }}</span>
+                    <span class="camera-status status-active" id="status-{{ loop.index0 }}">Active</span>
+                </div>
+                <img src="{{ url_for('video_feed', camera_id=loop.index0) }}" 
+                     class="camera-feed" 
+                     id="feed-{{ loop.index0 }}">
+                <div class="loading" id="loading-{{ loop.index0 }}">Connecting...</div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="log-container">
+            <h2>Detection Log</h2>
+            <iframe src="/detection_log" width="100%" height="300" 
+                    frameborder="0" style="border:1px solid #ccc;"></iframe>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize all camera feeds
+            {% for camera in cameras %}
+            initCameraFeed({{ loop.index0 }});
+            {% endfor %}
+            
+            function initCameraFeed(cameraId) {
+                const feed = document.getElementById(`feed-${cameraId}`);
+                const status = document.getElementById(`status-${cameraId}`);
+                const loading = document.getElementById(`loading-${cameraId}`);
+                const container = document.getElementById(`camera-container-${cameraId}`);
+                
+                // Initially show loading message
+                feed.style.display = 'none';
+                loading.style.display = 'flex';
+                
+                feed.onload = function() {
+                    loading.style.display = 'none';
+                    feed.style.display = 'block';
+                    status.textContent = 'Active';
+                    status.className = 'camera-status status-active';
+                };
+                
+                feed.onerror = function() {
+                    status.textContent = 'Disconnected';
+                    status.className = 'camera-status status-inactive';
+                    loading.textContent = 'Connection Failed';
+                };
+                
+                // Check feed status periodically
+                setInterval(function() {
+                    if (feed.naturalWidth === 0 && feed.complete) {
+                        status.textContent = 'Disconnected';
+                        status.className = 'camera-status status-inactive';
+                        loading.style.display = 'flex';
+                        feed.style.display = 'none';
+                        loading.textContent = 'Reconnecting...';
+                        
+                        // Attempt to reload feed
+                        const src = feed.src;
+                        feed.src = '';
+                        setTimeout(() => feed.src = src, 2000);
+                    }
+                }, 5000);
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+            position: sticky;
+            top: 0;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .camera-cell {
+            font-weight: bold;
+        }
+        .rokok-cell {
+            color: #dc3545;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <table>
+        <thead>
+            <tr>
+                <th>Date Time</th>
+                <th>Camera</th>
+                <th>Detail</th>
+                <th>Confidence</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for log in logs %}
+            <tr>
+                <td>{{ log.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                <td class="camera-cell">{{ log.cam }}</td>
+                <td class="rokok-cell">{{ log.detail }}</td>
+                <td>{{ '%.2f' % log.confidence }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="4">No detections recorded</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
