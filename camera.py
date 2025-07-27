@@ -9,6 +9,8 @@ import traceback
 from sqlalchemy.exc import OperationalError
 from database import DetectionLog, db
 import queue
+from twilio.rest import Client
+from config import Config
 
 log_queue = queue.Queue()
 
@@ -249,11 +251,18 @@ class Camera:
         print(f"Detection stopped for {self.name}")
     
     def _log_detection(self, class_name, confidence):
-        # Push detection event to the global log queue
         if self.app is None:
             print("App context not available. Skipping log.")
             return
+            
         try:
             log_queue.put((class_name, confidence, self.name))
         except Exception as e:
             print(f"Failed to enqueue detection log: {e}")
+        
+        if class_name == 'merokok':
+            try:
+                from setup import notification_queue
+                notification_queue.put((self.name, confidence))
+            except Exception as e:
+                print(f"Failed to enqueue notification: {e}")

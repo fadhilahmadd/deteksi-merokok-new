@@ -1,13 +1,15 @@
+import queue
 from config import Config
 from detection_processor import processor
-from database import db, DetectionLog
-from camera import Camera, detection_log_worker, log_queue
-
+from database import db
+from camera import Camera
 
 import threading
-from flask import Flask, render_template, Response
-import cv2
-import time
+from flask import Flask
+from twilio.rest import Client
+from config import Config
+
+notification_queue = queue.Queue()
 
 # Flask app setup
 def create_app():
@@ -29,10 +31,10 @@ def setup_processor(app):
     processor.min_interval = Config.MIN_LOG_INTERVAL
 
     # Start the logging thread only once
-    if not hasattr(setup_processor, "_log_thread_started"):
-        log_thread = threading.Thread(target=detection_log_worker, args=(app,), daemon=True)
-        log_thread.start()
-        setup_processor._log_thread_started = True
+    if not hasattr(setup_processor, "_notification_thread_started"):
+        notif_thread = threading.Thread(target=notification_worker, daemon=True)
+        notif_thread.start()
+        setup_processor._notification_thread_started = True
 
     for i, source in enumerate(Config.CAMERA_SOURCES):
         name = Config.CAMERA_NAMES[i] if i < len(Config.CAMERA_NAMES) else f"Camera {i+1}"
@@ -49,3 +51,24 @@ def setup_processor(app):
         )
         processor.add_camera(camera)
     processor.start()
+
+# Twillo
+def notification_worker():
+    """Background thread to send WhatsApp notifications"""
+    client = Client(Config.TWILIO_ACCOUNT_SID, Config.TWILIO_AUTH_TOKEN)
+    
+    while True:
+        try:
+            item = notification_queue.get()
+            if item is None:  # Poison pill to stop thread
+                break
+                
+            camera_name, confidence = item
+            message = client.messages.create(
+                body=f"🚭 Smoking detected!\nCamera: {camera_name}\nConfidence: {confidence:.2f}",
+                from_=Config.TWILIO_FROM_WHATSAPP,
+                to=Config.TWILIO_TO_WHATSAPP
+            )
+            print(f"Notification sent: {message.sid}")
+        except Exception as e:
+            print(f"Notification error: {e}")

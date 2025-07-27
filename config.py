@@ -35,3 +35,9 @@ class Config:
     CAMERA_HEIGHTS = list(map(int, os.getenv('CAMERA_HEIGHTS', '720').split(',')))
     CAMERA_FPS = list(map(int, os.getenv('CAMERA_FPS', '30').split(',')))
     RTSP_TRANSPORT = os.getenv('RTSP_TRANSPORT', 'tcp')
+    
+    # Twillo Configuration
+    TWILIO_ACCOUNT_SID = os.getenv('TWILIO_ACCOUNT_SID')
+    TWILIO_AUTH_TOKEN = os.getenv('TWILIO_AUTH_TOKEN')
+    TWILIO_FROM_WHATSAPP = os.getenv('TWILIO_FROM_WHATSAPP')
+    TWILIO_TO_WHATSAPP = os.getenv('TWILIO_TO_WHATSAPP')
