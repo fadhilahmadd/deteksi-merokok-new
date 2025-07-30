@@ -52,7 +52,7 @@ def setup_processor(app):
         processor.add_camera(camera)
     processor.start()
 
-# Twillo
+# Twilio
 def notification_worker():
     """Background thread to send WhatsApp notifications"""
     client = Client(Config.TWILIO_ACCOUNT_SID, Config.TWILIO_AUTH_TOKEN)
