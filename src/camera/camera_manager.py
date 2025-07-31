@@ -10,7 +10,11 @@ class CameraManager:
         self.model = None
         self.running = False
         self.thread = None
-        self.app_context = None
+        self.app = None
+    
+    def set_app(self, app):
+        """Binds the Flask app instance to the manager."""
+        self.app = app
 
     def setup_cameras_from_config(self):
         """Sets up cameras based on the global config."""
@@ -23,6 +27,8 @@ class CameraManager:
             self.add_camera(camera)
             
     def add_camera(self, camera):
+        """Adds a camera and attaches the app context to it."""
+        camera.app = self.app
         self.cameras.append(camera)
 
     def get_camera(self, camera_id):

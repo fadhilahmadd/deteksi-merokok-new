@@ -66,11 +66,11 @@ pip install -r requirements.txt
 ## Run the Application
 ### On macOS/Linux:
 ```bash
-python3 app.py
+python3 run.py
 ```
 ### On Windows:
 ```bash
-python app.py
+python run.py
 ```
 
 ### Key Features of the System:

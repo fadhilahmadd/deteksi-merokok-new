@@ -103,7 +103,7 @@
                     <span class="camera-name">{{ camera.name }}</span>
                     <span class="camera-status status-active" id="status-{{ loop.index0 }}">Active</span>
                 </div>
-                <img src="{{ url_for('video_feed', camera_id=loop.index0) }}" 
+                <img src="{{ url_for('main.video_feed', camera_id=loop.index0) }}" 
                      class="camera-feed" 
                      id="feed-{{ loop.index0 }}">
                 <div class="loading" id="loading-{{ loop.index0 }}">Connecting...</div>

@@ -55,7 +55,7 @@ def create_app(config_class=Config):
 
     return app
 
-def setup_background_tasks(app_context):
+def setup_background_tasks(app):
     """Initializes and starts all background tasks."""
     from .camera.camera_manager import processor
     from .camera.camera_instance import detection_log_worker
@@ -67,11 +67,12 @@ def setup_background_tasks(app_context):
         print("Twilio notification worker started.")
 
     # Start the database logging worker
-    db_log_thread = threading.Thread(target=detection_log_worker, args=(app_context,), daemon=True)
+    db_log_thread = threading.Thread(target=detection_log_worker, args=(app,), daemon=True)
     db_log_thread.start()
     print("Database logging worker started.")
 
-    # Configure and start camera processing
+    # Pass the app context to the processor BEFORE setting up cameras
+    processor.set_app(app)
     processor.setup_cameras_from_config()
     processor.start()
 
