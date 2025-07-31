@@ -105,4 +105,4 @@ python run.py
     - Shows the status of each camera.
 
 ### Model
-If you want try our model feel free to contact me ```bash zashxz011@gmail.com ```
+If you want try our model feel free to contact me ```zashxz011@gmail.com```
