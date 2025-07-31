@@ -1,29 +1,24 @@
-from flask import Flask, render_template, Response
+from flask import Blueprint, render_template, Response
+from flask_login import login_required, current_user
 import cv2
 import time
 from src.models import DetectionLog
 from src.camera.camera_manager import processor
-from setup import create_app, setup_processor
-from flask_login import login_required, current_user
 
-app = create_app()
-setup_processor(app)
+main = Blueprint('main', __name__)
 
-
-@app.route('/')
+@main.route('/')
 @login_required
 def index():
     return render_template('index.html', cameras=processor.cameras, name=current_user.username)
 
-
-@app.route('/detection_log')
+@main.route('/detection_log')
 @login_required
 def detection_log():
     logs = DetectionLog.query.order_by(DetectionLog.timestamp.desc()).limit(50).all()
     return render_template('log.html', logs=logs)
 
-
-@app.route('/video_feed/<int:camera_id>')
+@main.route('/video_feed/<int:camera_id>')
 @login_required
 def video_feed(camera_id):
     def generate(camera_id):
@@ -32,14 +27,9 @@ def video_feed(camera_id):
             frame = camera.get_latest_frame()
             if frame is not None:
                 ret, buffer = cv2.imencode('.jpg', frame)
+                if not ret:
+                    continue
                 yield (b'--frame\r\n'
                        b'Content-Type: image/jpeg\r\n\r\n' + buffer.tobytes() + b'\r\n')
-            else:
-                time.sleep(0.05)
-    return Response(generate(camera_id),
-                    mimetype='multipart/x-mixed-replace; boundary=frame')
-
-
-if __name__ == '__main__':
-    from src.config import Config
-    app.run(host=Config.HOST, port=Config.PORT, threaded=True, use_reloader=False)
+            time.sleep(0.05)
+    return Response(generate(camera_id), mimetype='multipart/x-mixed-replace; boundary=frame')

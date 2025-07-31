@@ -77,6 +77,11 @@
             width: 80%;
             margin-top: 30px;
         }
+        .user-info {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+        }
         @media (max-width: 768px) {
             .cameras-grid {
                 grid-template-columns: 1fr;
@@ -85,6 +90,9 @@
     </style>
 </head>
 <body>
+    <div class="user-info">
+        Welcome, <strong><a href="{{ url_for('auth.profile') }}">{{ name }}</a></strong>! | <a href="{{ url_for('auth.logout') }}">Logout</a>
+    </div>
     <div class="container">
         <h1>Multi-Camera Smoking Detection</h1>
         

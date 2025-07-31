@@ -4,6 +4,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class Config:
+    SECRET_KEY = os.getenv('SECRET_KEY')
+    
     DEBUG = os.getenv('FLASK_DEBUG', 'False') == 'True'
     HOST = os.getenv('FLASK_HOST', '0.0.0.0')
     PORT = int(os.getenv('FLASK_PORT', 5000))

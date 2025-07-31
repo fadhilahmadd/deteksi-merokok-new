@@ -21,13 +21,24 @@ This is on development, not final system.
      - `CAMERA_FPS=30,25,15`
    - Each value corresponds to the same camera index in all lists.
 
-3. **Example .env configuration:**
+3. **For WhatsApp notifications, fill in your Twilio credentials.**
+    - `TWILIO_ACCOUNT_SID:` Your Account SID from the Twilio console.
+    - `TWILIO_AUTH_TOKEN`: Your Auth Token from the Twilio console.
+    - `TWILIO_FROM_WHATSAPP`: Your Twilio WhatsApp-enabled number (e.g., whatsapp:+14155238886).
+    - `TWILIO_TO_WHATSAPP`: The destination WhatsApp number (e.g., whatsapp:+6281234567890).
+
+4. **Example .env configuration:**
    ```env
    CAMERA_SOURCES=0,1,http://192.168.1.10:8080/video
    CAMERA_NAMES=Front Door,Back Door,IP Cam
    CAMERA_WIDTHS=1280,1280,640
    CAMERA_HEIGHTS=720,720,480
    CAMERA_FPS=30,30,15
+
+   TWILIO_ACCOUNT_SID=ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+   TWILIO_AUTH_TOKEN=your_auth_token
+   TWILIO_FROM_WHATSAPP=whatsapp:+14155238886
+   TWILIO_TO_WHATSAPP=whatsapp:+6281234567890
    ```
 
 ### Set Up a Virtual Environment
@@ -74,17 +85,24 @@ python app.py
 3. Automatic Startup
     - Detection begins immediately on app launch
     - No need to open web interface
-4. Robust & Efficient Architecture
+4. WhatsApp Notifications
+    - Sends real-time alerts via WhatsApp when smoking is detected.
+    - Powered by Twilio for reliable delivery.
+    - The notification includes the camera name and detection confidence.
+5. Robust & Efficient Architecture
     - Separate threads per camera for video processing
     - Automatic camera restart on failure
     - Shared YOLO model for all cameras (memory efficient)
     - **Thread-safe logging queue:** All detection events are pushed to a single queue
     - **Single logging thread:** Only one thread writes to the database, reducing contention and improving performance with many cameras
-5. Database Logging
+6. Database Logging
     - MySQL integration
     - Camera-specific logging
-    - Throttled logging to prevent spam
-6. Web Interface
-    - Real-time camera feeds
-    - Detection log display
-    - Camera status indicators
+    - Throttled logging to prevent spamming the database with repeated detections.
+7. Web Interface
+    - Provides real-time video feeds from all cameras.
+    - Displays a log of recent detections.
+    - Shows the status of each camera.
+
+### Model
+If you want try our model feel free to contact me ```bash zashxz011@gmail.com ```

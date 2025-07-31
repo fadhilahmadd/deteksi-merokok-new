@@ -3,14 +3,14 @@ import cv2
 import time
 import numpy as np
 import threading
-
 import math
 import traceback
-from sqlalchemy.exc import OperationalError
-from database import DetectionLog, db
 import queue
-from twilio.rest import Client
-from config import Config
+from sqlalchemy.exc import OperationalError
+
+from src import db, notification_queue
+from src.models import DetectionLog
+from src.config import Config
 
 log_queue = queue.Queue()
 
@@ -251,10 +251,6 @@ class Camera:
         print(f"Detection stopped for {self.name}")
     
     def _log_detection(self, class_name, confidence):
-        if self.app is None:
-            print("App context not available. Skipping log.")
-            return
-            
         try:
             log_queue.put((class_name, confidence, self.name))
         except Exception as e:
@@ -262,7 +258,7 @@ class Camera:
         
         if class_name == 'merokok':
             try:
-                from setup import notification_queue
+                # Use the imported notification_queue
                 notification_queue.put((self.name, confidence))
             except Exception as e:
                 print(f"Failed to enqueue notification: {e}")

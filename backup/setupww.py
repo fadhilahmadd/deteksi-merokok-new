@@ -1,13 +1,13 @@
 import queue
-from config import Config
-from detection_processor import processor
-from database import db
-from camera import Camera
-
+from src.config import Config
+from src.camera.camera_manager import processor
+from src.models import db, User
+from src.camera.camera_instance import Camera
 import threading
 from flask import Flask
 from twilio.rest import Client
-from config import Config
+from src.config import Config
+from flask_login import LoginManager
 
 notification_queue = queue.Queue()
 
@@ -15,10 +15,29 @@ notification_queue = queue.Queue()
 def create_app():
     app = Flask(__name__)
     app.config['DEBUG'] = Config.DEBUG
+    app.config['SECRET_KEY'] = 'a-very-secret-key' # Change this!
     app.config['SQLALCHEMY_DATABASE_URI'] = Config.SQLALCHEMY_DATABASE_URI
     app.config['SQLALCHEMY_ENGINE_OPTIONS'] = Config.SQLALCHEMY_ENGINE_OPTIONS
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = Config.SQLALCHEMY_TRACK_MODIFICATIONS
     db.init_app(app)
+
+    login_manager = LoginManager()
+    login_manager.login_view = 'auth.login'
+    login_manager.init_app(app)
+
+    @login_manager.user_loader
+    def load_user(user_id):
+        return User.query.get(int(user_id))
+
+    # Blueprint for web auth routes
+    from src.auth.routes import auth as auth_blueprint
+    app.register_blueprint(auth_blueprint)
+
+    # Blueprint for API auth routes
+    from src.api.routes import api_auth as api_auth_blueprint
+    app.register_blueprint(api_auth_blueprint)
+
+
     with app.app_context():
         db.create_all()
     return app

@@ -1,6 +1,5 @@
-from flask_sqlalchemy import SQLAlchemy
-
-db = SQLAlchemy()
+from flask_login import UserMixin
+from . import db
 
 class DetectionLog(db.Model):
     __tablename__ = 'detection_logs'
@@ -14,3 +13,9 @@ class DetectionLog(db.Model):
         self.detail = detail
         self.confidence = confidence
         self.cam = cam
+
+class User(UserMixin, db.Model):
+    __tablename__ = 'users'
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(100), unique=True, nullable=False)
+    password = db.Column(db.String(256), nullable=False)
