@@ -77,6 +77,11 @@
             width: 80%;
             margin-top: 30px;
         }
+        .user-info {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+        }
         @media (max-width: 768px) {
             .cameras-grid {
                 grid-template-columns: 1fr;
@@ -85,6 +90,9 @@
     </style>
 </head>
 <body>
+    <div class="user-info">
+        Welcome, <strong><a href="{{ url_for('auth.profile') }}">{{ name }}</a></strong>! | <a href="{{ url_for('auth.logout') }}">Logout</a>
+    </div>
     <div class="container">
         <h1>Multi-Camera Smoking Detection</h1>
         
@@ -95,7 +103,7 @@
                     <span class="camera-name">{{ camera.name }}</span>
                     <span class="camera-status status-active" id="status-{{ loop.index0 }}">Active</span>
                 </div>
-                <img src="{{ url_for('video_feed', camera_id=loop.index0) }}" 
+                <img src="{{ url_for('main.video_feed', camera_id=loop.index0) }}" 
                      class="camera-feed" 
                      id="feed-{{ loop.index0 }}">
                 <div class="loading" id="loading-{{ loop.index0 }}">Connecting...</div>
